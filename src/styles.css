@@ -2,3 +2,29 @@
 @plugin "daisyui" {
   themes: caramellatte --default, coffee --prefersdark;
 }
+
+/* flatten the built-in themes: no 3d depth, no noise texture */
+@plugin "daisyui/theme" {
+  name: "caramellatte";
+  default: true;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "coffee";
+  prefersdark: true;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* fully flat: no button shadows */
+.btn {
+  box-shadow: none;
+}
+
+/* flat buttons need an edge to separate from the card */
+.btn:not(.btn-primary, .btn-ghost, :has(input:checked)) {
+  border: 1px solid color-mix(in oklch, var(--color-base-content) 15%, transparent);
+  background-color: var(--color-base-100);
+}
