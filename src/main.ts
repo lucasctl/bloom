@@ -55,3 +55,8 @@ mountLogForm(
 if ("serviceWorker" in navigator && location.hostname !== "localhost") {
   void navigator.serviceWorker.register("/sw.js");
 }
+
+// ask the browser to exempt our storage from automatic eviction
+if (navigator.storage?.persist) {
+  void navigator.storage.persist();
+}
