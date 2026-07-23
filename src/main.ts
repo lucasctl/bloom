@@ -6,6 +6,21 @@ import { mountHistory } from "./ui/history.ts";
 
 const store = await loadStore();
 
+// hash-based tabs
+const views = {
+  "#brew": document.querySelector<HTMLElement>("#view-brew")!,
+  "#history": document.querySelector<HTMLElement>("#view-history")!,
+};
+const tabs = document.querySelectorAll<HTMLAnchorElement>("[data-tabs] .tab");
+
+function showView() {
+  const hash = location.hash in views ? (location.hash as keyof typeof views) : "#brew";
+  for (const [key, el] of Object.entries(views)) el.hidden = key !== hash;
+  for (const tab of tabs) tab.classList.toggle("tab-active", tab.hash === hash);
+}
+window.addEventListener("hashchange", showView);
+showView();
+
 let currentInput: RecipeInput;
 mountCalculator(document.querySelector<HTMLElement>("#calculator")!, (input) => {
   currentInput = input;

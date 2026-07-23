@@ -8,9 +8,14 @@ function formatTime(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
+/** brewedAt (backdated) wins over createdAt for display and sorting */
+function brewDate(brew: Brew): string {
+  return brew.brewedAt ?? brew.createdAt;
+}
+
 function daysOffRoast(brew: Brew): number | null {
   if (!brew.roastDate) return null;
-  const ms = new Date(brew.createdAt).getTime() - new Date(brew.roastDate).getTime();
+  const ms = new Date(brewDate(brew)).getTime() - new Date(brew.roastDate).getTime();
   return Math.max(0, Math.round(ms / 86_400_000));
 }
 
@@ -24,7 +29,7 @@ function scoreBar(label: string, value: number): string {
 }
 
 function brewCard(brew: Brew): string {
-  const date = new Date(brew.createdAt).toLocaleDateString(undefined, {
+  const date = new Date(brewDate(brew)).toLocaleDateString(undefined, {
     day: "numeric",
     month: "short",
   });
@@ -82,20 +87,31 @@ export type HistoryOptions = {
 };
 
 export function mountHistory(root: HTMLElement, opts: HistoryOptions): { render: () => void } {
+const SORTS = {
+  newest: { label: "Newest first", compare: (a: Brew, b: Brew) => brewDate(b).localeCompare(brewDate(a)) },
+  oldest: { label: "Oldest first", compare: (a: Brew, b: Brew) => brewDate(a).localeCompare(brewDate(b)) },
+  sweetness: { label: "Sweetest", compare: (a: Brew, b: Brew) => b.sweetness - a.sweetness },
+  acidity: { label: "Most acidic", compare: (a: Brew, b: Brew) => b.acidity - a.acidity },
+  bitterness: { label: "Least bitter", compare: (a: Brew, b: Brew) => a.bitterness - b.bitterness },
+  body: { label: "Fullest body", compare: (a: Brew, b: Brew) => b.body - a.body },
+} satisfies Record<string, { label: string; compare: (a: Brew, b: Brew) => number }>;
+
   root.innerHTML = `
-    <div class="mt-8">
+    <div>
       <div role="alert" class="alert alert-warning mb-3" data-banner hidden>
         <span data-banner-text></span>
         <button class="btn btn-sm" data-export-banner>Export now</button>
       </div>
-      <div class="flex items-baseline justify-between pb-2">
-        <h2 class="text-xl font-bold">History</h2>
-        <div class="flex items-center gap-2">
-          <input data-filter class="input input-sm w-36" placeholder="filter by coffee" hidden />
-          <button class="btn btn-sm btn-ghost" data-export>Export</button>
-          <button class="btn btn-sm btn-ghost" data-import>Import</button>
-          <input type="file" accept="application/json,.json" data-file hidden />
-        </div>
+      <div class="flex flex-wrap items-center gap-2 pb-3">
+        <input data-filter class="input input-sm flex-1 min-w-32" placeholder="filter by coffee" />
+        <select data-sort class="select select-sm w-36">
+          ${Object.entries(SORTS)
+            .map(([key, s]) => `<option value="${key}">${s.label}</option>`)
+            .join("")}
+        </select>
+        <button class="btn btn-sm btn-ghost" data-export>Export</button>
+        <button class="btn btn-sm btn-ghost" data-import>Import</button>
+        <input type="file" accept="application/json,.json" data-file hidden />
       </div>
       <p class="text-sm opacity-70" data-status hidden></p>
       <div class="flex flex-col gap-2" data-list></div>
@@ -104,6 +120,7 @@ export function mountHistory(root: HTMLElement, opts: HistoryOptions): { render:
 
   const list = root.querySelector<HTMLElement>("[data-list]")!;
   const filter = root.querySelector<HTMLInputElement>("[data-filter]")!;
+  const sortSelect = root.querySelector<HTMLSelectElement>("[data-sort]")!;
   const banner = root.querySelector<HTMLElement>("[data-banner]")!;
   const bannerText = root.querySelector<HTMLElement>("[data-banner-text]")!;
   const status = root.querySelector<HTMLElement>("[data-status]")!;
@@ -117,17 +134,13 @@ export function mountHistory(root: HTMLElement, opts: HistoryOptions): { render:
     banner.classList.toggle("alert-error", unexported >= 15);
     bannerText.textContent = `${unexported} brews since last export.`;
 
-    filter.hidden = brews.length === 0;
     const query = filter.value.trim().toLowerCase();
     const shown = query
       ? brews.filter((b) => b.coffeeName.toLowerCase().includes(query))
       : brews;
+    const sort = SORTS[sortSelect.value as keyof typeof SORTS] ?? SORTS.newest;
     list.innerHTML = shown.length
-      ? shown
-          .slice()
-          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-          .map(brewCard)
-          .join("")
+      ? shown.slice().sort(sort.compare).map(brewCard).join("")
       : `<p class="text-sm opacity-60">${brews.length ? "No brews match." : "No brews logged yet."}</p>`;
   }
 
@@ -154,6 +167,7 @@ export function mountHistory(root: HTMLElement, opts: HistoryOptions): { render:
   });
 
   filter.addEventListener("input", render);
+  sortSelect.addEventListener("change", render);
   render();
   return { render };
 }

@@ -10,13 +10,23 @@
   </head>
   <body>
     <main class="mx-auto max-w-xl p-4 pb-16">
-      <header class="py-6">
-        <h1 class="text-3xl font-bold">Bloom</h1>
-        <p class="opacity-70 text-sm">4:6 pour-over calculator &amp; brew log</p>
+      <header class="flex items-baseline justify-between py-6">
+        <div>
+          <h1 class="text-3xl font-bold">Bloom</h1>
+          <p class="opacity-70 text-sm">4:6 pour-over calculator &amp; brew log</p>
+        </div>
+        <nav class="tabs tabs-box tabs-sm" data-tabs>
+          <a href="#brew" class="tab">Brew</a>
+          <a href="#history" class="tab">History</a>
+        </nav>
       </header>
-      <section id="calculator"></section>
-      <section id="log-form" hidden></section>
-      <section id="history"></section>
+      <div id="view-brew">
+        <section id="calculator"></section>
+        <section id="log-form" hidden></section>
+      </div>
+      <div id="view-history" hidden>
+        <section id="history"></section>
+      </div>
     </main>
   </body>
 </html>

@@ -11,7 +11,8 @@ export const PourSchema = z.object({
 
 export const BrewSchema = z.object({
   id: z.uuid(),
-  createdAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(), // when logged — immutable, drives the backup nag
+  brewedAt: z.optional(z.iso.date()), // when brewed, if backdated — wins for display/sort
 
   // bean
   roaster: z.string(),

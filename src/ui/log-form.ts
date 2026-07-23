@@ -41,6 +41,10 @@ export function mountLogForm(
       <form class="collapse-content flex flex-col gap-4">
         <div class="grid grid-cols-2 gap-4">
           <label class="form-control">
+            <span class="label-text pb-1">Brew date</span>
+            <input name="brewedAt" type="date" class="input w-full" value="${new Date().toISOString().slice(0, 10)}" required />
+          </label>
+          <label class="form-control">
             <span class="label-text pb-1">Roaster</span>
             <input name="roaster" class="input w-full" placeholder="La Cabra" />
           </label>
@@ -106,6 +110,7 @@ export function mountLogForm(
     onSave({
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
+      brewedAt: text("brewedAt") || undefined,
       roaster: text("roaster"),
       coffeeName: text("coffeeName"),
       origin: text("origin"),
