@@ -91,10 +91,14 @@ export function mountCalculator(
 
     <div class="card bg-base-200 mt-4">
       <div class="card-body">
-        <div class="flex items-baseline justify-between">
+        <div class="flex items-center justify-between">
           <h2 class="card-title">Schedule</h2>
-          <span class="text-sm opacity-70" data-total></span>
+          <div class="join" data-unit>
+            <button type="button" class="btn btn-xs join-item" data-unit-g>g</button>
+            <button type="button" class="btn btn-xs join-item" data-unit-pct>%</button>
+          </div>
         </div>
+        <span class="text-sm opacity-70" data-total></span>
         <div class="overflow-x-auto">
           <table class="table table-zebra">
             <thead>
@@ -115,22 +119,38 @@ export function mountCalculator(
   const totalEl = root.querySelector("[data-total]")!;
   const intervalEl = root.querySelector("[data-interval]")!;
   const splitEl = root.querySelector("[data-split]")!;
+  const unitG = root.querySelector<HTMLButtonElement>("[data-unit-g]")!;
+  const unitPct = root.querySelector<HTMLButtonElement>("[data-unit-pct]")!;
+
+  let usePercent = localStorage.getItem("bloom-unit") === "%";
 
   function render() {
     const { waterTotal, pours } = calculateRecipe(input);
     totalEl.textContent = `${input.dose}g coffee · ${waterTotal}g water`;
+    unitG.classList.toggle("btn-primary", !usePercent);
+    unitPct.classList.toggle("btn-primary", usePercent);
+    const fmt = (grams: number) =>
+      usePercent ? `${Math.round((grams / waterTotal) * 100)}%` : `${grams}g`;
     scheduleBody.innerHTML = pours
       .map(
         (p, i) => `
           <tr>
             <td class="font-bold tabular-nums whitespace-nowrap"><span aria-hidden="true" class="status ${i < 2 ? "status-warning" : "status-info"} sm:hidden mr-1"></span>${i + 1}<span class="badge badge-soft badge-sm ml-2 hidden sm:inline-flex ${i < 2 ? "badge-warning" : "badge-info"}">${i < 2 ? "flavour" : "strength"}</span></td>
             <td class="tabular-nums">${formatTime(p.atSeconds)}</td>
-            <td class="text-right tabular-nums">+${p.added}g</td>
-            <td class="text-right tabular-nums font-bold">${p.runningTotal}g</td>
+            <td class="text-right tabular-nums">+${fmt(p.added)}</td>
+            <td class="text-right tabular-nums font-bold">${fmt(p.runningTotal)}</td>
           </tr>`,
       )
       .join("");
     onChange?.({ ...input });
+  }
+
+  for (const [button, value] of [[unitG, false], [unitPct, true]] as const) {
+    button.addEventListener("click", () => {
+      usePercent = value;
+      localStorage.setItem("bloom-unit", value ? "%" : "g");
+      render();
+    });
   }
 
   root.addEventListener("input", (e) => {
