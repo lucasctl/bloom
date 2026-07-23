@@ -6,6 +6,12 @@ const STRENGTH_OPTIONS = [
   { value: 3, label: "Stronger", hint: "3 pours" },
 ] as const;
 
+const ROAST_OPTIONS = [
+  { value: 93, label: "Light", hint: "93°C" },
+  { value: 88, label: "Medium", hint: "88°C" },
+  { value: 83, label: "Dark", hint: "83°C" },
+] as const;
+
 const DEFAULTS: RecipeInput = {
   dose: 15,
   ratio: 15,
@@ -79,6 +85,13 @@ export function mountCalculator(
           <span class="label-text">Strength — last 60%</span>
           <div class="flex gap-2 pt-1" role="radiogroup">
             ${radioGroup("strengthPours", STRENGTH_OPTIONS, input.strengthPours)}
+          </div>
+        </div>
+
+        <div>
+          <span class="label-text">Roast — suggested water temp</span>
+          <div class="flex gap-2 pt-1" role="radiogroup">
+            ${radioGroup("roastTemp", ROAST_OPTIONS, 88)}
           </div>
         </div>
 
