@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#6f4e37" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="./icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
     <title>Bloom</title>
     <link rel="stylesheet" href="./styles.css" />
     <script type="module" src="./main.ts"></script>
@@ -11,9 +14,12 @@
   <body>
     <main class="mx-auto max-w-xl p-4 pb-16">
       <header class="flex items-baseline justify-between py-6">
-        <div>
-          <h1 class="text-3xl font-bold">Bloom</h1>
-          <p class="opacity-70 text-sm">4:6 pour-over calculator &amp; brew log</p>
+        <div class="flex items-center gap-3">
+          <img src="./icons/icon-192.png" alt="" class="size-11 rounded-xl" />
+          <div>
+            <h1 class="text-3xl font-bold">Bloom</h1>
+            <p class="opacity-70 text-sm">4:6 pour-over calculator &amp; brew log</p>
+          </div>
         </div>
         <nav class="tabs tabs-box tabs-sm" data-tabs>
           <a href="#brew" class="tab">Brew</a>

@@ -50,3 +50,8 @@ mountLogForm(
     history.render();
   },
 );
+
+// offline support — skipped in dev where sw.js isn't served
+if ("serviceWorker" in navigator && location.hostname !== "localhost") {
+  void navigator.serviceWorker.register("/sw.js");
+}
