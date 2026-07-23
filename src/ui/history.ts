@@ -74,24 +74,50 @@ function brewCard(brew: Brew): string {
     </details>`;
 }
 
-export function mountHistory(root: HTMLElement, getBrews: () => Brew[]): { render: () => void } {
+export type HistoryOptions = {
+  getBrews: () => Brew[];
+  getUnexportedCount: () => number;
+  onExport: () => void;
+  onImportFile: (file: File) => Promise<string>;
+};
+
+export function mountHistory(root: HTMLElement, opts: HistoryOptions): { render: () => void } {
   root.innerHTML = `
-    <div class="mt-8" data-container hidden>
+    <div class="mt-8">
+      <div role="alert" class="alert alert-warning mb-3" data-banner hidden>
+        <span data-banner-text></span>
+        <button class="btn btn-sm" data-export-banner>Export now</button>
+      </div>
       <div class="flex items-baseline justify-between pb-2">
         <h2 class="text-xl font-bold">History</h2>
-        <input data-filter class="input input-sm w-40" placeholder="filter by coffee" />
+        <div class="flex items-center gap-2">
+          <input data-filter class="input input-sm w-36" placeholder="filter by coffee" hidden />
+          <button class="btn btn-sm btn-ghost" data-export>Export</button>
+          <button class="btn btn-sm btn-ghost" data-import>Import</button>
+          <input type="file" accept="application/json,.json" data-file hidden />
+        </div>
       </div>
+      <p class="text-sm opacity-70" data-status hidden></p>
       <div class="flex flex-col gap-2" data-list></div>
     </div>
   `;
 
-  const container = root.querySelector<HTMLElement>("[data-container]")!;
   const list = root.querySelector<HTMLElement>("[data-list]")!;
   const filter = root.querySelector<HTMLInputElement>("[data-filter]")!;
+  const banner = root.querySelector<HTMLElement>("[data-banner]")!;
+  const bannerText = root.querySelector<HTMLElement>("[data-banner-text]")!;
+  const status = root.querySelector<HTMLElement>("[data-status]")!;
+  const fileInput = root.querySelector<HTMLInputElement>("[data-file]")!;
 
   function render() {
-    const brews = getBrews();
-    container.hidden = brews.length === 0;
+    const brews = opts.getBrews();
+
+    const unexported = opts.getUnexportedCount();
+    banner.hidden = unexported < 5;
+    banner.classList.toggle("alert-error", unexported >= 15);
+    bannerText.textContent = `${unexported} brews since last export.`;
+
+    filter.hidden = brews.length === 0;
     const query = filter.value.trim().toLowerCase();
     const shown = query
       ? brews.filter((b) => b.coffeeName.toLowerCase().includes(query))
@@ -102,8 +128,30 @@ export function mountHistory(root: HTMLElement, getBrews: () => Brew[]): { rende
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map(brewCard)
           .join("")
-      : `<p class="text-sm opacity-60">No brews match.</p>`;
+      : `<p class="text-sm opacity-60">${brews.length ? "No brews match." : "No brews logged yet."}</p>`;
   }
+
+  function showStatus(message: string) {
+    status.textContent = message;
+    status.hidden = false;
+    setTimeout(() => (status.hidden = true), 6000);
+  }
+
+  for (const selector of ["[data-export]", "[data-export-banner]"]) {
+    root.querySelector(selector)!.addEventListener("click", () => {
+      opts.onExport();
+      render();
+    });
+  }
+
+  root.querySelector("[data-import]")!.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    showStatus(await opts.onImportFile(file));
+    fileInput.value = "";
+    render();
+  });
 
   filter.addEventListener("input", render);
   render();
