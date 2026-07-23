@@ -119,7 +119,7 @@ export function mountCalculator(
       .map(
         (p, i) => `
           <tr>
-            <td class="font-bold tabular-nums">${i + 1} <span class="badge badge-soft badge-sm ml-1 ${i < 2 ? "badge-warning" : "badge-info"}">${i < 2 ? "flavour" : "strength"}</span></td>
+            <td class="font-bold tabular-nums whitespace-nowrap"><span aria-hidden="true" class="status ${i < 2 ? "status-warning" : "status-info"} sm:hidden mr-1"></span>${i + 1}<span class="badge badge-soft badge-sm ml-2 hidden sm:inline-flex ${i < 2 ? "badge-warning" : "badge-info"}">${i < 2 ? "flavour" : "strength"}</span></td>
             <td class="tabular-nums">${formatTime(p.atSeconds)}</td>
             <td class="text-right tabular-nums">+${p.added}g</td>
             <td class="text-right tabular-nums font-bold">${p.runningTotal}g</td>
