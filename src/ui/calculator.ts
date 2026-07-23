@@ -1,15 +1,15 @@
 import { calculateRecipe, type RecipeInput } from "../recipe.ts";
 
 const STRENGTH_OPTIONS = [
-  { value: 2, label: "Lighter", hint: "2 pours" },
-  { value: 3, label: "Medium", hint: "3 pours" },
-  { value: 4, label: "Stronger", hint: "4 pours" },
+  { value: 1, label: "Lighter", hint: "1 pour" },
+  { value: 2, label: "Medium", hint: "2 pours" },
+  { value: 3, label: "Stronger", hint: "3 pours" },
 ] as const;
 
 const DEFAULTS: RecipeInput = {
   dose: 15,
   ratio: 15,
-  flavourSplitFirst: 40,
+  flavourSplitFirst: 50,
   strengthPours: 3,
   pourIntervalSeconds: 45,
 };
@@ -70,8 +70,8 @@ export function mountCalculator(
           </div>
           <input name="flavourSplitFirst" type="range" min="35" max="65" step="5" value="${input.flavourSplitFirst}" class="range range-primary w-full mt-1" />
           <div class="flex justify-between text-xs opacity-60 px-1">
-            <span>brighter · more acidic</span>
             <span>sweeter · rounder</span>
+            <span>brighter · more acidic</span>
           </div>
         </div>
 
@@ -146,7 +146,7 @@ export function mountCalculator(
         splitEl.textContent = `${value} / ${100 - value}`;
         break;
       case "strengthPours":
-        if (value === 2 || value === 3 || value === 4) input.strengthPours = value;
+        if (value === 1 || value === 2 || value === 3) input.strengthPours = value;
         break;
       case "pourIntervalSeconds":
         input.pourIntervalSeconds = value;

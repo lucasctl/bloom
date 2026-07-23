@@ -2,7 +2,27 @@ import { describe, expect, test } from "bun:test";
 import { calculateRecipe } from "./recipe.ts";
 
 describe("calculateRecipe", () => {
-  test("worked example from the plan: 15g, 1:15, 40% first, 3 strength pours", () => {
+  test("canonical Philocoffea example: 20g → five equal 60g pours", () => {
+    // https://en.philocoffea.com/blogs/blog/coffee-brewing-method
+    const { waterTotal, pours } = calculateRecipe({
+      dose: 20,
+      ratio: 15,
+      flavourSplitFirst: 50,
+      strengthPours: 3,
+      pourIntervalSeconds: 45,
+    });
+
+    expect(waterTotal).toBe(300);
+    expect(pours).toEqual([
+      { atSeconds: 0, added: 60, runningTotal: 60 },
+      { atSeconds: 45, added: 60, runningTotal: 120 },
+      { atSeconds: 90, added: 60, runningTotal: 180 },
+      { atSeconds: 135, added: 60, runningTotal: 240 },
+      { atSeconds: 180, added: 60, runningTotal: 300 },
+    ]);
+  });
+
+  test("40/60 flavour split: 15g, 1:15, 3 strength pours", () => {
     const { waterTotal, pours } = calculateRecipe({
       dose: 15,
       ratio: 15,
@@ -38,7 +58,7 @@ describe("calculateRecipe", () => {
   });
 
   test("pour count is 2 + strengthPours", () => {
-    for (const strengthPours of [2, 3, 4] as const) {
+    for (const strengthPours of [1, 2, 3] as const) {
       const { pours } = calculateRecipe({
         dose: 20,
         ratio: 15,
@@ -50,7 +70,20 @@ describe("calculateRecipe", () => {
     }
   });
 
-  test("60/40 split makes the first pour larger", () => {
+  test("single strength pour delivers the whole 60% at once", () => {
+    const { pours } = calculateRecipe({
+      dose: 20,
+      ratio: 15,
+      flavourSplitFirst: 50,
+      strengthPours: 1,
+      pourIntervalSeconds: 45,
+    });
+    expect(pours).toHaveLength(3);
+    expect(pours[2]!.added).toBe(180);
+    expect(pours[2]!.runningTotal).toBe(300);
+  });
+
+  test("larger first pour → brighter (60/40 split)", () => {
     const { pours } = calculateRecipe({
       dose: 15,
       ratio: 15,

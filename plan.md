@@ -27,11 +27,13 @@ A personal filter-coffee tool: calculates a 4:6 pour schedule from a dose and ra
 Tetsu Kasuya's method splits total water into two parts:
 
 - **First 40% — flavour.** Two pours. The *split between them* controls acidity vs. sweetness:
-  - smaller first pour → brighter, more acidic
-  - larger first pour → sweeter, rounder
+  - smaller first pour → sweeter, rounder
+  - larger first pour → brighter, more acidic
 - **Last 60% — strength.** The *number of pours* controls body:
-  - 2 pours → lighter · 3 → medium · 4 → stronger
+  - 1 pour → lighter · 2 → medium · 3 → stronger (Tetsu's recommendation)
   - Always split evenly among themselves.
+
+Canonical baseline (per [Philocoffea](https://en.philocoffea.com/blogs/blog/coffee-brewing-method)): 1:15 ratio, five *equal* pours of 3×dose each, 45s apart — i.e. 50/50 flavour split + 3 strength pours.
 
 Calculator inputs:
 
@@ -39,8 +41,8 @@ Calculator inputs:
 |---|---|---|
 | Dose (g) | 15 | scale |
 | Ratio | 1:15 | total water = dose × ratio |
-| Flavour split (first pour %) | 40 / 50 / 60 | balance of the first two pours |
-| Strength pours | 2, 3 or 4 | how the back 60% divides |
+| Flavour split (first pour %) | 35–65, default 50 | smaller first pour = sweeter, larger = brighter |
+| Strength pours | 1, 2 or 3 | how the back 60% divides; more pours = stronger |
 | Pour interval | 45s | spacing between pour starts |
 
 Worked example — 15g, 1:15, 40% first pour, 3 strength pours:
@@ -87,7 +89,7 @@ export const BrewSchema = z.object({
   grindSetting: z.string(),         // free text — grinders all number differently
   waterTemp: z.number(),            // °C
   flavourSplitFirst: z.int().min(1).max(99), // % of the 40% in pour 1; pour 2 derived
-  strengthPours: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+  strengthPours: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   pours: z.array(z.object({
     atSeconds: z.int().nonnegative(),
     added: z.number(),

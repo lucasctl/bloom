@@ -9,8 +9,8 @@ export type RecipeInput = {
   ratio: number;
   /** % of the flavour phase (first 40%) in pour 1, e.g. 40 | 50 | 60 */
   flavourSplitFirst: number;
-  /** number of pours in the strength phase (last 60%) */
-  strengthPours: 2 | 3 | 4;
+  /** number of pours in the strength phase (last 60%): 1 = lighter … 3 = stronger */
+  strengthPours: 1 | 2 | 3;
   /** seconds between pour starts */
   pourIntervalSeconds: number;
 };
