@@ -103,6 +103,10 @@ export function mountCalculator(
             <tbody data-schedule></tbody>
           </table>
         </div>
+        <div class="flex gap-4 text-xs opacity-70 sm:hidden">
+          <span><span aria-hidden="true" class="status status-warning"></span> flavour</span>
+          <span><span aria-hidden="true" class="status status-info"></span> strength</span>
+        </div>
       </div>
     </div>
   `;
